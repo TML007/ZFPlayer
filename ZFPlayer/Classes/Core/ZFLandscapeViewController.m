@@ -73,14 +73,19 @@
             self.contentView.frame = [self.delegate ls_targetRect];
         }
         [self.contentView layoutIfNeeded];
+        if (@available(iOS 15.0, *)) {
+            CGFloat duration = [coordinator transitionDuration];
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(duration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                [CATransaction commit];
+            });
+        }
     } completion:^(id<UIViewControllerTransitionCoordinatorContext> _Nonnull context) {
-        [CATransaction commit];
-        [self.delegate ls_didRotateFromOrientation:self.currentOrientation];
-        if (!isFullscreen) {
-            self.contentView.frame = self.containerView.bounds;
-            [self.contentView layoutIfNeeded];
+        if (@available(iOS 15.0, *)) {
+        } else {
+            [CATransaction commit];
         }
         self.disableAnimations = NO;
+        [self.delegate ls_didRotateFromOrientation:self.currentOrientation];
         self.rotating = NO;
     }];
 }
